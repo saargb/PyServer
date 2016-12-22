@@ -18,6 +18,8 @@ socket.connect(('', 4444))
 name = socket.recv(size)
 recipient = name
 
+def isRequestingNameChange()
+
 while True:
     str = raw_input('>> ')
     send(str)
