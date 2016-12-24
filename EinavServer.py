@@ -26,23 +26,29 @@ def output():
             request a list of the connected clients and their names
     :return: None
     '''
-    message = request_queue.get()
-    messageInfo = message.split('::')
-    sender = messageInfo[0]
-    content = messageInfo[1]
-    recipient = messageInfo[2].replace('\n', '')
-    if recipient.startswith('0000'):
-        server_output(sender, content, recipient)
-    elif clients.has_key(recipient):
-        clients.get(recipient).send(sender + ' said:\t' + content)
-    else:
-        client.send('The user does not exist')
+    while True:
+#        print 'Debug: about to take the raw message out of the queue'
+        message = request_queue.get()
+#       print 'Debug: the message, as it was taken out of the queue: ', message
+        messageInfo = message.split('::')
+        sender = messageInfo[0]
+        content = messageInfo[1]
+        recipient = messageInfo[2].replace('\n', '')
+#        print 'Debug: ', sender, content, recipient
+        if recipient.startswith('0000'):
+            print 'Debug: request for server has arrived from ' + sender
+            server_output(sender, content, recipient)
+        elif clients.has_key(recipient):
+            clients.get(recipient).send(sender + ' said:\t' + content)
+        else:
+            client.send('The user does not exist')
 
 def server_output(sender, content, recipient):
     client = clients[sender]
     if recipient.endswith('0'):
         client.send('You said: ' + content)
     elif recipient.endswith('1'):
+        print 'Debug: the server recognized the client\'s need for a new name.'
         client = clients[sender]
         clients.pop(sender)
         clients[content] = client
@@ -56,7 +62,7 @@ def server_output(sender, content, recipient):
 start_new_thread(output, ())
 
 try:
-    server.bind(('', 4444))
+    server.bind(('', 4000))
 except Exception, e:
     server.close()
     raise e
@@ -65,6 +71,7 @@ server.listen(2)
 i = 0
 while True:
     client = ClientIO(server.accept()[0], request_queue)
+    print str(i)
     client.start()
     client.send(str(i)) # make sure that the client receives the message as soon as he connects.
     clients[str(i)] = client

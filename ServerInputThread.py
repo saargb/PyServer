@@ -11,6 +11,7 @@ class ClientIO(Thread):
     def run(self):
         while True:
             str = self.socket.recv(size)
+            print 'Debug: the raw, recieved string: ', str
             self.request_queue.put(str)
     def send(self, msg):
         self.socket.send(msg)
